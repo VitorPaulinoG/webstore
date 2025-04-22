@@ -27,7 +27,7 @@ public class UsuarioController {
     private String url;
 
 
-    @RequestMapping(value="/usuario", method=RequestMethod.POST)
+    @RequestMapping(value="/register", method=RequestMethod.POST)
     public void realizarCadastro(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Usuario usuario = new Usuario();
         usuario.setName(request.getParameter("name"));
