@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 
 
+
 @Controller
 public class UsuarioController {
     @Value("${spring.datasource.url}")
@@ -26,6 +27,76 @@ public class UsuarioController {
     @Value("${spring.datasource.password}")
     private String url;
 
+    @RequestMapping(value="/login", method=RequestMethod.GET)
+    public void login (HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("text/html");
+        var writer = response.getWriter();
+        writer.println("<!DOCTYPE html>");
+        writer.println("<html>");
+        writer.println("<head>");
+        writer.println("<title>Login</title>");
+        writer.println(
+            """
+            <style>
+                html, body {
+                    width: 100%;
+                    height: 100%;
+                }
+
+                .flex {
+                    display: flex;
+                }
+
+                .flex-row {
+                    flex-direction: row;
+                }
+
+                .flex-col {
+                    flex-direction: column;
+                }
+
+                .p-2 {
+                    padding: 0.5rem; 
+                }
+
+                .border {
+                    border: 1px solid black;
+                }
+                .rounded {
+                    border-radius: 8px; 
+                }
+
+                .w-30 {
+                    width: 30rem;
+                }
+            </style>
+            """);
+        writer.println("</head>");
+
+        writer.println("<body>");
+
+        writer.println("<main class=\"flex flex-col w-30\">");
+
+        writer.println("<h1>LOGIN</h1>");
+        writer.println("<form class=\"flex flex-col\" action=\"/auth\" method=\"post\">");
+        writer.println("<label for=\"email\">");
+        writer.println("Email");
+        writer.println("</label>");
+        writer.println("<input type=\"text\" id=\"email\" name=\"email\"");
+        writer.println("<label for=\"password\">");
+        writer.println("Senha");
+        writer.println("</label>");
+        writer.println("<input type=\"password\" id=\"password\" name=\"password\"/>");
+        writer.println("<button type=\"submit\">Entrar</button>");
+        
+        writer.println("</form>");
+        
+        writer.println("</main>");
+
+        writer.println("</body>");
+        writer.println("</html>");
+    }   
+    
 
     @RequestMapping(value="/register", method=RequestMethod.POST)
     public void realizarCadastro(HttpServletRequest request, HttpServletResponse response) throws IOException {
