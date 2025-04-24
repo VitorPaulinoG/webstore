@@ -3,6 +3,7 @@ package com.programacao.web.webstore;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-public class ProdutoController{
+public class ProdutoController {
+
     @Value("${spring.datasource.url}")
     private String url;
 
@@ -27,8 +29,10 @@ public class ProdutoController{
     private String password;
 
     @RequestMapping(value = "/produtos", method = RequestMethod.GET)
-    public void listarProdutos(HttpServletRequest request, HttpServletResponse response)throws IOException, ServletException {
+    public void listarProdutos(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         List<Produto> produtos = new ArrayList<>();
+        HttpSession session = request.getSession(false);
+        String tipoUsuario = (String) session.getAttribute("tipoUsuario");
         String sql = "SELECT * FROM produtos";
 
         try (Connection conn = DriverManager.getConnection(this.url, this.user, this.password);
@@ -51,32 +55,48 @@ public class ProdutoController{
             response.getWriter().write("<p>Erro ao listar produtos: " + e.getMessage() + "</p>");
         }
 
-        PrintWriter writer = response.getWriter();
+        if ("cliente".equals(tipoUsuario)) {
+            PrintWriter writer = response.getWriter();
 
-        writer.println("<html><body>");
-        writer.println("<h2>Lista de Produtos</h2><ul>");
-        writer.println("<table border='1'>");
-        writer.println("<tr><th>Nome</th><th>Descrição</th><th>Preço</th><th>Estoque</th><th>Carrinho<th></tr>" );
+            writer.println("<html><body>");
+            writer.println("<h2>Lista de Produtos</h2><ul>");
+            writer.println("<table border='1'>");
+            writer.println("<tr><th>Nome</th><th>Descrição</th><th>Preço</th><th>Estoque</th><th>Carrinho</th></tr>");
 
+            for (Produto p : produtos) {
+                writer.println("<tr><td>" + p.getNome() + "</td><td>" + p.getDescricao() + "</td><td>" + p.getPreco() + "</td><td>" + p.getEstoque() + "</td><td><a href='adicionarProduto?id=" + p.getId() + "'>Adicionar</a></td></tr>");
+            }
 
-        for (Produto p : produtos) {
-            writer.println("<tr><td>" + p.getNome() + "</td><td>" + p.getDescricao() + "</td><td>" + p.getPreco() + "</td><td>" + p.getEstoque() + "</td><td>"+ p.getEstoque() + "</td><td><a href='adicionarProduto?id=" + p.getId() + "'>Adicionar</a></td></tr>");
+            writer.println("</table>");
+            writer.println("</body></html>");
+
+        } else if ("lojista".equals(tipoUsuario)) {
+            PrintWriter writer = response.getWriter();
+
+            writer.println("<html><body>");
+            writer.println("<h2>Lista de Produtos</h2><ul>");
+            writer.println("<table border='1'>");
+            writer.println("<tr><th>Nome</th><th>Descrição</th><th>Preço</th><th>Estoque</th></tr>");
+
+            for (Produto p : produtos) {
+                writer.println("<tr><td>" + p.getNome() + "</td><td>" + p.getDescricao() + "</td><td>" + p.getPreco() + "</td><td>" + p.getEstoque() + "</td><td><a href='/inserirProdutos'>Cadastrar Novo Produto</a></td></tr>");
+            }
+
+            writer.println("</table>");
+            writer.println("</body></html>");
         }
 
-        writer.println("</table>");
-        writer.println("</body></html>");
     }
 
-    @RequestMapping(value="/produtos", method=RequestMethod.POST)
-    public void inserirProduto(HttpServletRequest request, HttpServletResponse response)throws IOException, ServletException {
+    @RequestMapping(value = "/inserirProdutos", method = RequestMethod.POST)
+    public void inserirProduto(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String nome = request.getParameter("nome");
+        String descricao = request.getParameter("descricao");
+        double preco = Double.parseDouble(request.getParameter("preco"));
+        int estoque = Integer.parseInt(request.getParameter("estoque"));
+        Produto p = new Produto(nome, descricao, preco, estoque);
 
-            String nome = request.getParameter("nome");
-            String descricao = request.getParameter("descricao");
-            double preco = Double.parseDouble(request.getParameter("preco"));
-            int estoque = Integer.parseInt(request.getParameter("estoque"));
-            Produto p = new Produto(nome,descricao,preco,estoque);
-
-            String sql = "INSERT INTO produtos (nome, descricao, preco, estoque) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO produtos (nome, descricao, preco, estoque) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DriverManager.getConnection(this.url, this.user, this.password);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -94,56 +114,9 @@ public class ProdutoController{
             System.out.println(e.getMessage());
         }
     }
+}
 
-    @RequestMapping(value = "/produtos/{id}", method = RequestMethod.PUT)
-    public void atualizarProduto(@PathVariable int id, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String nome = request.getParameter("nome");
-        String descricao = request.getParameter("descricao");
-        double preco = Double.parseDouble(request.getParameter("preco"));
-        int estoque = Integer.parseInt(request.getParameter("estoque"));
 
-        String sql = "UPDATE produtos SET nome=?, descricao=?, preco=?, estoque=? WHERE id=?";
 
-        try (Connection conn = DriverManager.getConnection(this.url, this.user, this.password);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, nome);
-            stmt.setString(2, descricao);
-            stmt.setDouble(3, preco);
-            stmt.setInt(4, estoque);
-            stmt.setInt(5, id);
-
-            stmt.executeUpdate();
-            response.getWriter().write("Produto inserido com sucesso!");
-
-        } catch (SQLException e) {
-            response.getWriter().write("Erro ao inserir produto!");
-            System.out.println(e.getMessage());
-        }
-    }
-
-    @RequestMapping(value = "/produtos/{id}", method = RequestMethod.DELETE)
-    public void removerProduto(@PathVariable int id, HttpServletResponse response) throws IOException {
-        String sql = "DELETE FROM produtos WHERE id = ?";
-
-        try (Connection conn = DriverManager.getConnection(this.url, this.user, this.password);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-            int linhasAfetadas = stmt.executeUpdate();
-
-            if (linhasAfetadas > 0) {
-                response.getWriter().write("Produto removido com sucesso!");
-                response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
-            } else {
-                response.getWriter().write("Produto não encontrado.");
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Produto não encontrado.");
-            }
-
-        } catch (SQLException e) {
-            System.out.println("Erro ao remover produto: " + e.getMessage());
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Erro ao remover produto.");
-        }
-    }
 
 
