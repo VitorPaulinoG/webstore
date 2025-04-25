@@ -82,11 +82,12 @@ public class ProdutoController {
             writer.println("<td>" + produto.getDescricao() + "</td>");
             writer.println("<td>" + produto.getPreco() + "</td>");
             writer.println("<td>" + produto.getEstoque() + "</td>");
-            writer.println("<td><a href=/carrinho> Adicionar </a></td>");
+            writer.println("<td><a href='/carrinho/" + produto.getId() + "'>Adicionar</a></td>");
             writer.println("</tr>");
         }
 
         writer.println("</table>");
+        writer.println("<a href='/carrinho'> Ver Carrinho </a>");
         writer.println("</body>");
         writer.println("</html>");
     }
@@ -151,6 +152,7 @@ public class ProdutoController {
             e.printStackTrace();
         }
     }
+
 }
 
 
