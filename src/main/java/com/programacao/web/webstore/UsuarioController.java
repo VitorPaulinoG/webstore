@@ -6,12 +6,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,14 +20,16 @@ import jakarta.servlet.http.HttpServletResponse;
 @Controller
 public class UsuarioController {
     @Value("${spring.datasource.url}")
-    private String user;
-    @Value("${spring.datasource.username}")
-    private String password;
-    @Value("${spring.datasource.password}")
     private String url;
+    @Value("${spring.datasource.username}")
+    private String user;
+    @Value("${spring.datasource.password}")
+    private String password;
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public void login(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        var error = Optional.ofNullable(request.getParameter("error-message"));
+
         response.setContentType("text/html");
         var writer = response.getWriter();
         writer.println("<!DOCTYPE html>");
@@ -47,10 +49,20 @@ public class UsuarioController {
         writer.println("Email");
         writer.println("</label>");
         writer.println("<input type=\"text\" id=\"email\" name=\"email\"/>");
+
+        error.filter(e -> e.contains("Email não encontrado")).ifPresent(e -> {
+            writer.println("<span class=\"text-red\">Usuário não encontrado com esse email!</span>");
+        });
+
         writer.println("<label for=\"password\">");
         writer.println("Senha");
         writer.println("</label>");
         writer.println("<input type=\"password\" id=\"password\" name=\"password\"/>");
+
+        error.filter(e -> e.contains("Senha incorreta")).ifPresent(e -> {
+            writer.println("<span class=\"text-red\">Senha incorreta!</span>");
+        });
+
         writer.println("<button type=\"submit\">Entrar</button>");
 
         writer.println("</form>");
@@ -63,7 +75,9 @@ public class UsuarioController {
     }
 
     @RequestMapping(value = "/cadastro", method = RequestMethod.GET)
-    public void cadastrp(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void cadastro(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        var error = Optional.ofNullable(request.getParameter("error-message"));
+
         response.setContentType("text/html");
         var writer = response.getWriter();
         writer.println("<!DOCTYPE html>");
@@ -75,10 +89,11 @@ public class UsuarioController {
 
         writer.println("<body>");
 
-        writer.println("<main class=\"flex flex-col w-30\">");
+        writer.println("<main class=\"flex w-full h-full items-center justify-center\">");
+        writer.println("<div class=\"flex flex-col  w-30 border rounded p-6\">");
 
         writer.println("<h1>Cadastro</h1>");
-        writer.println("<form class=\"flex flex-col gap-2\" action=\"/auth\" method=\"post\">");
+        writer.println("<form class=\"flex flex-col gap-2\" action=\"/register\" method=\"post\">");
 
         writer.println("<label for=\"name\">");
         writer.println("Nome");
@@ -90,22 +105,31 @@ public class UsuarioController {
         writer.println("</label>");
         writer.println("<input type=\"text\" id=\"email\" name=\"email\"/>");
 
+        error.filter(e -> e.contains("Email inválido")).ifPresent(e -> {
+            writer.println("<span class=\"text-red\">Email Inválido! Digite novamente.</span>");
+        });
+
         writer.println("<label for=\"password\">");
         writer.println("Senha");
         writer.println("</label>");
         writer.println("<input type=\"password\" id=\"password\" name=\"password\"/>");
 
+        error.filter(e -> e.contains("Senha inválida")).ifPresent(e -> {
+            writer.println("<span class=\"text-red\">Senha Inválida! Digite novamente.</span>");
+        });
+
         writer.println("<label for=\"role\">");
         writer.println("Papel");
         writer.println("</label>");
         writer.println("<select id=\"role\" name=\"role\">");
-        writer.println("<option value=\"cliente\">Cliente</option>");
-        writer.println("<option value=\"lojista\">Logista</option>");
+        writer.println("<option value=\"Cliente\">Cliente</option>");
+        writer.println("<option value=\"Lojista\">Logista</option>");
         writer.println("</select>");
 
         writer.println("<button type=\"submit\">Entrar</button>");
 
         writer.println("</form>");
+        writer.println("</div>");
 
         writer.println("</main>");
 
@@ -115,11 +139,27 @@ public class UsuarioController {
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public void realizarCadastro(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        final String VALID_EMAIL_PATTERN = "^[^@]+@[^@]+\\.[a-zA-Z]{2,}$";
+
         Usuario usuario = new Usuario();
         usuario.setName(request.getParameter("name"));
         usuario.setEmail(request.getParameter("email"));
         usuario.setPassword(request.getParameter("password"));
         usuario.setRole(request.getParameter("role"));
+
+        if (!usuario.getEmail().matches(VALID_EMAIL_PATTERN)) {
+            response.sendRedirect(UriComponentsBuilder.fromUriString("/cadastro")
+                    .queryParam("error-message", "Email inválido")
+                    .toUriString());
+            return;
+        }
+
+        if (usuario.getPassword().length() < 5) {
+            response.sendRedirect(UriComponentsBuilder.fromUriString("/cadastro")
+                    .queryParam("error-message", "Senha inválida")
+                    .toUriString());
+            return;
+        }
 
         String sql = """
                 insert into usuario (name, email, password, role)
@@ -172,14 +212,16 @@ public class UsuarioController {
 
         if (usuarioAtual == null) {
             response.sendRedirect(UriComponentsBuilder.fromUriString("/login")
-                    .queryParam("error-message", "Email inválido")
+                    .queryParam("error-message", "Email não encontrado")
                     .toUriString());
+            return;
         }
 
         if (!usuarioAtual.getPassword().equals(password)) {
             response.sendRedirect(UriComponentsBuilder.fromUriString("/login")
-                    .queryParam("error-message", "Senha inválida")
+                    .queryParam("error-message", "Senha incorreta")
                     .toUriString());
+            return;
         }
 
         var session = request.getSession();

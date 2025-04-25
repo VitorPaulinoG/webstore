@@ -86,3 +86,7 @@ button {
     border-radius: 4px; 
     cursor: pointer; 
 }
+
+.text-red {
+    color: red;
+}
