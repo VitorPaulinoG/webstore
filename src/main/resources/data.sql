@@ -4,7 +4,7 @@ CREATE TABLE usuario (
     email VARCHAR(200) NOT NULL UNIQUE,
     password VARCHAR(200) NOT NULL,
     role VARCHAR(200) NOT NULL,
-    CONSTRAINT pk_usuario PRIMARY KEY (id);
+    CONSTRAINT pk_usuario PRIMARY KEY (id)
 );
 
 INSERT INTO usuario (name, email, password, role) 
