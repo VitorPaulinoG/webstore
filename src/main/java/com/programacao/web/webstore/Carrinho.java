@@ -41,12 +41,9 @@ public class Carrinho {
             }
          }
 
-
-    public List<ItemCarrinho> getItens() {
-            return itens;
+        public List<ItemCarrinho> getItens() {
+                return itens;
         }
-
-
 }
 
 

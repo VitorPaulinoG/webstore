@@ -10,11 +10,12 @@ public class ItemCarrinho {
         }
 
         public Produto getProduto() { return produto; }
+
         public int getQuantidade() { return quantidade; }
 
         public void incrementarQuantidade() { this.quantidade++; }
 
         public void decrementarQuantidade() { this.quantidade--; }
-    }
+}
 
 

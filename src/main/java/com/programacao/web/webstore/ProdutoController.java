@@ -28,7 +28,7 @@ public class ProdutoController {
     private String password;
 
     @RequestMapping(value = "/produtos", method = RequestMethod.GET)
-    public void listarProdutos(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    public void listarProdutos(HttpServletRequest request, HttpServletResponse response) throws IOException {
         List<Produto> produtos = new ArrayList<>();
         String sql = "SELECT * FROM produtos";
 
@@ -126,7 +126,7 @@ public class ProdutoController {
 
 
     @RequestMapping(value = "/produto", method = RequestMethod.POST)
-    public void inserirProduto(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    public void inserirProduto(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         String nome = request.getParameter("nome");
         String descricao = request.getParameter("descricao");
@@ -152,7 +152,6 @@ public class ProdutoController {
             e.printStackTrace();
         }
     }
-
 }
 
 
