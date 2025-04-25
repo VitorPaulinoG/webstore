@@ -9,10 +9,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-
 @Controller
 public class MainController {
-    @RequestMapping(value="/", method=RequestMethod.GET)
+    @RequestMapping(value = "/", method = RequestMethod.GET)
     public void home(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html");
         var writer = response.getWriter();
@@ -20,55 +19,26 @@ public class MainController {
         writer.println("<html>");
         writer.println("<head>");
         writer.println("<title>Home</title>");
-        writer.println(
-            """
-            <style>
-                html, body {
-                    width: 100%;
-                    height: 100%;
-                }
-
-                .flex {
-                    display: flex;
-                }
-
-                .flex-row {
-                    flex-direction: row;
-                }
-
-                .flex-col {
-                    flex-direction: column;
-                }
-
-                .p-2 {
-                    padding: 0.5rem; 
-                }
-
-                .border {
-                    border: 1px solid black;
-                }
-                .rounded {
-                    border-radius: 8px; 
-                }
-            </style>
-            """);
+        writer.println("<link rel=\"stylesheet\" href=\"/styles.css\">");
         writer.println("</head>");
 
         writer.println("<body>");
 
-        writer.println("<main class=\"flex flex-row\">");
+        writer.println("<main class=\"flex flex-row w-full h-full justify-center items-center\">");
 
-        writer.println("<a href='/login' class=\"p-2 border rounded\">");
+        writer.println("<div class=\"grid grid-col-2 gap-2\">");
+        writer.println("<a href='/login' class=\"p-2 flex justify-center items-center border rounded h-auto\">");
         writer.println("LOGIN");
         writer.println("</a>");
-        writer.println("<a href='/cadastro'' class=\"p-2 border rounded\">");
+        writer.println("<a href='/cadastro'' class=\"p-2 flex justify-center items-center border rounded h-auto\">");
         writer.println("CADASTRO");
         writer.println("</a>");
+        writer.println("</div>");
 
         writer.println("</main>");
 
         writer.println("</body>");
         writer.println("</html>");
     }
-    
+
 }

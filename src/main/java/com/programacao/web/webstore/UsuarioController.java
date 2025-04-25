@@ -11,12 +11,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.util.UriBuilderFactory;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-
-
 
 @Controller
 public class UsuarioController {
@@ -27,60 +26,21 @@ public class UsuarioController {
     @Value("${spring.datasource.password}")
     private String url;
 
-    @RequestMapping(value="/login", method=RequestMethod.GET)
-    public void login (HttpServletRequest request, HttpServletResponse response) throws IOException {
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    public void login(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html");
         var writer = response.getWriter();
         writer.println("<!DOCTYPE html>");
         writer.println("<html>");
         writer.println("<head>");
         writer.println("<title>Login</title>");
-        writer.println(
-            """
-            <style>
-                html, body {
-                    width: 100%;
-                    height: 100%;
-                }
-
-                .flex {
-                    display: flex;
-                }
-
-                .flex-row {
-                    flex-direction: row;
-                }
-
-                .flex-col {
-                    flex-direction: column;
-                }
-
-                .p-2 {
-                    padding: 0.5rem; 
-                }
-
-                .border {
-                    border: 1px solid black;
-                }
-                .rounded {
-                    border-radius: 8px; 
-                }
-
-                .gap-2 {
-                    gap: 0.5rem;
-                }
-                    
-                .w-30 {
-                    width: 30rem;
-                }
-            </style>
-            """);
+        writer.println("<link rel=\"stylesheet\" href=\"/styles.css\">");
         writer.println("</head>");
 
         writer.println("<body>");
 
-        writer.println("<main class=\"flex flex-col w-30\">");
-
+        writer.println("<main class=\"flex w-full h-full items-center justify-center\">");
+        writer.println("<div class=\"flex flex-col  w-30 border rounded p-6\">");
         writer.println("<h1>LOGIN</h1>");
         writer.println("<form class=\"flex flex-col gap-2\" action=\"/auth\" method=\"post\">");
         writer.println("<label for=\"email\">");
@@ -92,16 +52,17 @@ public class UsuarioController {
         writer.println("</label>");
         writer.println("<input type=\"password\" id=\"password\" name=\"password\"/>");
         writer.println("<button type=\"submit\">Entrar</button>");
-        
+
         writer.println("</form>");
-        
+        writer.println("</div>");
+
         writer.println("</main>");
 
         writer.println("</body>");
         writer.println("</html>");
-    }   
-    
-    @RequestMapping(value="/cadastro", method=RequestMethod.GET)
+    }
+
+    @RequestMapping(value = "/cadastro", method = RequestMethod.GET)
     public void cadastrp(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html");
         var writer = response.getWriter();
@@ -109,44 +70,7 @@ public class UsuarioController {
         writer.println("<html>");
         writer.println("<head>");
         writer.println("<title>Cadastro</title>");
-        writer.println(
-            """
-            <style>
-                html, body {
-                    width: 100%;
-                    height: 100%;
-                }
-
-                .flex {
-                    display: flex;
-                }
-
-                .flex-row {
-                    flex-direction: row;
-                }
-
-                .flex-col {
-                    flex-direction: column;
-                }
-
-                .p-2 {
-                    padding: 0.5rem; 
-                }
-
-                .border {
-                    border: 1px solid black;
-                }
-                .rounded {
-                    border-radius: 8px; 
-                }
-                .gap-2 {
-                    gap: 0.5rem;
-                }
-                .w-30 {
-                    width: 30rem;
-                }
-            </style>
-            """);
+        writer.println("<link rel=\"stylesheet\" href=\"/styles.css\">");
         writer.println("</head>");
 
         writer.println("<body>");
@@ -155,7 +79,7 @@ public class UsuarioController {
 
         writer.println("<h1>Cadastro</h1>");
         writer.println("<form class=\"flex flex-col gap-2\" action=\"/auth\" method=\"post\">");
-        
+
         writer.println("<label for=\"name\">");
         writer.println("Nome");
         writer.println("</label>");
@@ -165,12 +89,12 @@ public class UsuarioController {
         writer.println("Email");
         writer.println("</label>");
         writer.println("<input type=\"text\" id=\"email\" name=\"email\"/>");
-        
+
         writer.println("<label for=\"password\">");
         writer.println("Senha");
         writer.println("</label>");
         writer.println("<input type=\"password\" id=\"password\" name=\"password\"/>");
-        
+
         writer.println("<label for=\"role\">");
         writer.println("Papel");
         writer.println("</label>");
@@ -180,32 +104,31 @@ public class UsuarioController {
         writer.println("</select>");
 
         writer.println("<button type=\"submit\">Entrar</button>");
-        
+
         writer.println("</form>");
-        
+
         writer.println("</main>");
 
         writer.println("</body>");
         writer.println("</html>");
-    }   
+    }
 
-    @RequestMapping(value="/register", method=RequestMethod.POST)
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
     public void realizarCadastro(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Usuario usuario = new Usuario();
         usuario.setName(request.getParameter("name"));
         usuario.setEmail(request.getParameter("email"));
         usuario.setPassword(request.getParameter("password"));
         usuario.setRole(request.getParameter("role"));
-        
-        String sql = 
-            """
-            insert into usuario (name, email, password, role) 
-            values (?, ?, ?, ?) 
-            """;
+
+        String sql = """
+                insert into usuario (name, email, password, role)
+                values (?, ?, ?, ?)
+                """;
 
         try (Connection conn = getConnection()) {
             PreparedStatement statement = conn.prepareStatement(sql);
-            
+
             statement.setString(1, usuario.getName());
             statement.setString(2, usuario.getEmail());
             statement.setString(3, usuario.getPassword());
@@ -219,24 +142,25 @@ public class UsuarioController {
         response.sendRedirect("/login");
     }
 
-    @RequestMapping(value="/auth", method=RequestMethod.POST)
+    @RequestMapping(value = "/auth", method = RequestMethod.POST)
     public void autenticar(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        String sql = 
-            """
-            select * from usuario 
-            where email = ?
-            """;
-        Usuario usuarioAtual = new Usuario();
+        String sql = """
+                select * from usuario
+                where email = ?
+                """;
+        Usuario usuarioAtual = null;
         try (Connection conn = getConnection()) {
             PreparedStatement statement = conn.prepareStatement(sql);
-            
+
             statement.setString(1, email);
 
             ResultSet result = statement.executeQuery();
             if (result.next()) {
+                usuarioAtual = new Usuario();
+                usuarioAtual.setId(result.getLong("id"));
                 usuarioAtual.setName(result.getString("name"));
                 usuarioAtual.setEmail(result.getString("email"));
                 usuarioAtual.setPassword(result.getString("password"));
@@ -246,20 +170,36 @@ public class UsuarioController {
             ex.printStackTrace();
         }
 
-
-        if(!usuarioAtual.getPassword().equals(password)) {
-            response.sendRedirect("/login");
+        if (usuarioAtual == null) {
+            response.sendRedirect(UriComponentsBuilder.fromUriString("/login")
+                    .queryParam("error-message", "Email inválido")
+                    .toUriString());
         }
 
-        // Criar Sessão
+        if (!usuarioAtual.getPassword().equals(password)) {
+            response.sendRedirect(UriComponentsBuilder.fromUriString("/login")
+                    .queryParam("error-message", "Senha inválida")
+                    .toUriString());
+        }
 
-        // Redirecionar para página correspondente
-        // Se role = Cliente, Lista Produtos (caso de uso)
-        // Se role = Lojista, Exibe Produtos (caso de uso)
+        var session = request.getSession();
+        if (session.isNew()) {
+            session.setAttribute("user-id", usuarioAtual.getId());
+            session.setAttribute("user-role", usuarioAtual.getRole());
+        }
+
+        switch (usuarioAtual.getRole()) {
+            case "Cliente":
+                // Lista Produtos (caso de uso)
+                break;
+            case "Lojista":
+                // Exibe Produtos (caso de uso)
+                break;
+        }
     }
 
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(url, user, password);
     }
-    
+
 }
