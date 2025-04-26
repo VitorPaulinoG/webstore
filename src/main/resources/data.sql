@@ -23,3 +23,8 @@ CREATE TABLE produtos (
             estoque INT NOT NULL
 );
 
+INSERT INTO produtos (nome, descricao, preco, estoque)
+VALUES
+    ('Mesa', 'Uma mesa de computador.', 500.00, 10),
+    ('Lápis', 'Lápis B2 grafite.', 2.00, 50),
+    ('Computador', 'Computador I5 16Gb de RAM.', 1500.00, 2);
