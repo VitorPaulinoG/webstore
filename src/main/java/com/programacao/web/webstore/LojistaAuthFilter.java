@@ -10,9 +10,10 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
-@WebFilter(urlPatterns = { "/produto", "/produtos" })
-public class ClientAuthFilter implements Filter {
+@WebFilter(urlPatterns = { "/lojista/*" })
+public class LojistaAuthFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
@@ -21,16 +22,31 @@ public class ClientAuthFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) resp;
 
         var session = request.getSession(false);
-        if (session == null) {
-            response.sendRedirect("/login");
+        if (!isAuthenticated(response, session))
             return;
-        }
 
-        if (!session.getAttribute("user-role").equals("Cliente")) {
-            response.sendRedirect("/");
+        if (!isAuthorized(response, session))
             return;
-        }
 
         chain.doFilter(request, response);
     }
+
+    private boolean isAuthenticated(HttpServletResponse response, HttpSession session)
+            throws IOException {
+        if (session == null) {
+            response.sendRedirect("/login");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isAuthorized(HttpServletResponse response, HttpSession session)
+            throws IOException {
+        if (!session.getAttribute("user-role").equals("Lojista")) {
+            response.sendRedirect("/");
+            return false;
+        }
+        return true;
+    }
+
 }
