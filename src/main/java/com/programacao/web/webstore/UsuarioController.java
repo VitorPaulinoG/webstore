@@ -232,7 +232,7 @@ public class UsuarioController {
 
         switch (usuarioAtual.getRole()) {
             case "Cliente":
-                // Lista Produtos (caso de uso)
+                response.sendRedirect("/produtos");
                 break;
             case "Lojista":
                 // Exibe Produtos (caso de uso)
