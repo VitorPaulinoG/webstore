@@ -24,15 +24,17 @@ public class MainController {
 
         writer.println("<body>");
 
-        writer.println("<main class=\"flex flex-row w-full h-full justify-center items-center\">");
+        writer.println("<main class=\"flex w-full h-full justify-center items-center\">");
 
-        writer.println("<div class=\"grid grid-col-2 gap-2\">");
+        writer.println("<div class=\"grid grid-col-2 gap-2 w-30\">");
+
         writer.println("<a href='/login' class=\"p-2 flex justify-center items-center border rounded h-auto\">");
         writer.println("LOGIN");
         writer.println("</a>");
         writer.println("<a href='/cadastro'' class=\"p-2 flex justify-center items-center border rounded h-auto\">");
         writer.println("CADASTRO");
         writer.println("</a>");
+
         writer.println("</div>");
 
         writer.println("</main>");
