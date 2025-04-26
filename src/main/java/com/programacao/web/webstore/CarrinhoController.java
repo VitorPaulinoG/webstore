@@ -26,25 +26,26 @@ public class CarrinhoController {
     @Value("${spring.datasource.password}")
     private String password;
 
-
-    @RequestMapping(value = "/carrinho/{id}", method=RequestMethod.GET)
+    @RequestMapping(value = "/carrinho/{id}", method = RequestMethod.GET)
     public void adicionarProduto(@PathVariable("id") int id, HttpSession session, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        Produto produto = buscarProdutoPorId(id);
 
-        if (produto != null) {
-            session = request.getSession();
-            Carrinho carrinho = (Carrinho) session.getAttribute("carrinho");
+        try {
+            Produto produto = buscarProdutoPorId(id);
+            if (produto != null) {
+                Carrinho carrinho = (Carrinho) session.getAttribute("carrinho");
 
-            if (carrinho == null) {
-                carrinho = new Carrinho();
-                session.setMaxInactiveInterval(20*60);
+                if (carrinho == null) {
+                    carrinho = new Carrinho();
+                    session.setAttribute("carrinho", carrinho);
+                    session.setMaxInactiveInterval(20 * 60);
+                }
+
+                carrinho.addProduto(produto);
+                session.setAttribute("carrinho", carrinho);
+                response.sendRedirect("/carrinho");
             }
-
-            carrinho.addProduto(produto);
-            session.setAttribute("carrinho", carrinho);
-            var dispatcher = request.getRequestDispatcher("/produtos");
-            dispatcher.forward(request, response);
-        }else{
+        }catch(Exception e){
+            e.printStackTrace();
             response.getWriter().write("<p>Produto não encontrado.</p>");
         }
     }
@@ -55,7 +56,7 @@ public class CarrinhoController {
         HttpSession session = request.getSession(false);
         Carrinho carrinho = (Carrinho) session.getAttribute("carrinho");
         if (carrinho == null) {
-            response.sendRedirect("/produtos");
+            response.sendRedirect("/cliente/produtos");
             return;
         }
 
@@ -66,12 +67,7 @@ public class CarrinhoController {
         writer.println("<html>");
         writer.println("<head>");
         writer.println("<title>Carrinho</title>");
-        writer.println("<style>");
-        writer.println("    body { font-family: Arial, sans-serif; max-width: 800px; margin: 30px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }");
-        writer.println("    table { width: 100%; border-collapse: collapse; margin-top: 20px; }");
-        writer.println("    th, td { padding: 12px; border: 1px solid #ccc; text-align: left; }");
-        writer.println("    th { background-color: #f2f2f2; }");
-        writer.println("</style>");
+        writer.println("<link rel=\"stylesheet\" href=\"/styles.css\">");
         writer.println("</head>");
         writer.println("<body>");
         writer.println("<h1>Carrinho</h1>");
@@ -97,6 +93,7 @@ public class CarrinhoController {
         }
 
         writer.println("</table>");
+        writer.println("<a href='/cliente/produtos'> Ver Produtos </a>");
         writer.println("</body>");
         writer.println("</html>");
 
