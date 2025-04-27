@@ -39,6 +39,14 @@ public class ProdutoController {
         writer.println("<link rel=\"stylesheet\" href=\"/styles.css\">");
         writer.println("</head>");
         writer.println("<body>");
+        writer.println("<main class=\"grid grid-col-1 grid-row-auto-full w-full h-full justify-center items-center\">");
+
+        writer.println("<header class=\"flex justify-right p-2\">");
+        writer.println("<form action=\"/logout\" method=\"post\"><button type=\"submit\" >Deslogar</button>");
+        writer.println("</header>");
+
+        writer.println(
+                "<div style=\"margin: 30px auto; padding: 20px; min-height: 30rem\" class=\"border rounded w-50\">");
         writer.println("<h2>Lista de Produtos</h2>");
         writer.println("<table>");
         writer.println("<tr>");
@@ -48,7 +56,6 @@ public class ProdutoController {
         writer.println("<th>Estoque</th>");
         writer.println("<th>Carrinho</th>");
         writer.println("</tr>");
-
 
         for (Produto produto : produtos) {
             writer.println("<tr>");
@@ -61,6 +68,8 @@ public class ProdutoController {
         }
 
         writer.println("</table>");
+        writer.println("</div>");
+        writer.println("</main>");
         writer.println("<a href='/carrinho'> Ver Carrinho </a>");
         writer.println("</body>");
         writer.println("</html>");
@@ -73,29 +82,49 @@ public class ProdutoController {
         writer.println("<html>");
         writer.println("<head>");
         writer.println("<title>Cadastrar Produto</title>");
-        writer.println("<link rel=\"stylesheet\" href=\"/styles.css\">");
+        writer.println("<style>");
+        writer.println(
+                "        body { font-family: Arial, sans-serif; max-width: 500px; margin: 30px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }");
+        writer.println(
+                "        input[type=\"text\"], input[type=\"number\"] { width: 100%; padding: 8px; margin: 8px 0 16px; box-sizing: border-box; }");
+        writer.println(
+                "        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }");
+        writer.println("        button:hover { background-color: #218838; }");
+        writer.println("</style>");
         writer.println("</head>");
+
         writer.println("<body>");
-        writer.println("    <h2>Cadastrar Novo Produto</h2>");
-        writer.println("    <form action='/produto' method='post'>");
-        writer.println("        <label for='nome'>Nome do Produto:</label>");
-        writer.println("        <input type='text' id='nome' name='nome' required>");
-        writer.println("        <label for='descricao'>Descrição:</label>");
-        writer.println("        <input type='text' id='descricao' name='descricao' required>");
-        writer.println("        <label for='preco'>Preço:</label>");
-        writer.println("        <input type='number' id='preco' name='preco' step='0.01' required>");
-        writer.println("        <label for='estoque'>Estoque:</label>");
-        writer.println("        <input type='number' id='estoque' name='estoque' required>");
-        writer.println("        <button type='submit'>Cadastrar</button>");
-        writer.println("    </form>");
+        writer.println("<main class=\"grid grid-col-1 grid-row-auto-full w-full h-full justify-center items-center\">");
+
+        writer.println("<header class=\"flex justify-right p-2\">");
+        writer.println("<form action=\"/logout\" method=\"post\"><button type=\"submit\" >Deslogar</button>");
+        writer.println("</header>");
+
+        writer.println(
+                "<div style=\"margin: 30px auto; padding: 20px;\" class=\"border rounded w-50\">");
+        writer.println("<h2>Cadastrar Novo Produto</h2>");
+        writer.println("<form action='/produto' method='post'>");
+        writer.println("<label for='nome'>Nome do Produto:</label>");
+        writer.println("<input type='text' id='nome' name='nome' required>");
+        writer.println("<label for='descricao'>Descrição:</label>");
+        writer.println("<input type='text' id='descricao' name='descricao' required>");
+        writer.println("<label for='preco'>Preço:</label>");
+        writer.println("<input type='number' id='preco' name='preco' step='0.01' required>");
+        writer.println("<label for='estoque'>Estoque:</label>");
+        writer.println("<input type='number' id='estoque' name='estoque' required>");
+        writer.println("<button type='submit'>Cadastrar</button>");
+        writer.println("</form>");
+        writer.println("</div>");
+
+        writer.println("</main>");
         writer.println("</body>");
         writer.println("</html>");
 
     }
 
-
-    @RequestMapping(value = "/produto", method = RequestMethod.POST)
-    public void inserirProduto(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    @RequestMapping(value = "/lojista/produto", method = RequestMethod.POST)
+    public void inserirProduto(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
 
         String nome = request.getParameter("nome");
         String descricao = request.getParameter("descricao");
@@ -105,7 +134,7 @@ public class ProdutoController {
 
         String sql = "INSERT INTO produtos (nome, descricao, preco, estoque) VALUES (?, ?, ?, ?)";
         try (Connection conn = DriverManager.getConnection(this.url, this.user, this.password);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, p.getNome());
             stmt.setString(2, p.getDescricao());
@@ -158,14 +187,14 @@ public class ProdutoController {
         writer.println("</html>");
     }
 
-    public List<Produto> findAll(){
+    public List<Produto> findAll() {
         List<Produto> produtos = new ArrayList<>();
 
         String sql = "SELECT * FROM produtos";
 
         try (Connection conn = DriverManager.getConnection(this.url, this.user, this.password);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 Produto p = new Produto(
@@ -173,21 +202,15 @@ public class ProdutoController {
                         rs.getString("nome"),
                         rs.getString("descricao"),
                         rs.getDouble("preco"),
-                        rs.getInt("estoque")
-                );
+                        rs.getInt("estoque"));
                 produtos.add(p);
             }
 
         } catch (SQLException e) {
-            if(produtos.isEmpty()){
+            if (produtos.isEmpty()) {
                 return null;
             }
         }
         return produtos;
     }
 }
-
-
-
-
-

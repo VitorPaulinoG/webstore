@@ -232,12 +232,22 @@ public class UsuarioController {
 
         switch (usuarioAtual.getRole()) {
             case "Cliente":
-                // Lista Produtos (caso de uso)
+                response.sendRedirect("/cliente/produtos");
                 break;
             case "Lojista":
-                // Exibe Produtos (caso de uso)
+                response.sendRedirect("/lojista/produtos");
                 break;
         }
+    }
+
+    @RequestMapping(value = "/logout", method = RequestMethod.POST)
+    public void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        var session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+
+        response.sendRedirect("/");
     }
 
     public Connection getConnection() throws SQLException {
