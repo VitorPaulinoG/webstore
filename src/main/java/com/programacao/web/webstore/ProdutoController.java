@@ -68,9 +68,9 @@ public class ProdutoController {
         }
 
         writer.println("</table>");
-        writer.println("<a href='/carrinho'> Ver Carrinho </a>");
         writer.println("</div>");
         writer.println("</main>");
+        writer.println("<a href='/carrinho'> Ver Carrinho </a>");
         writer.println("</body>");
         writer.println("</html>");
     }
