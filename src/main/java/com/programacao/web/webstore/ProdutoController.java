@@ -28,29 +28,8 @@ public class ProdutoController {
     private String password;
 
     @RequestMapping(value = "/cliente/produtos", method = RequestMethod.GET)
-    public void listarProdutos(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        List<Produto> produtos = new ArrayList<>();
-        String sql = "SELECT * FROM produtos";
-
-        try (Connection conn = DriverManager.getConnection(this.url, this.user, this.password);
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                Produto p = new Produto(
-                        rs.getInt("id"),
-                        rs.getString("nome"),
-                        rs.getString("descricao"),
-                        rs.getDouble("preco"),
-                        rs.getInt("estoque"));
-                produtos.add(p);
-            }
-
-        } catch (SQLException e) {
-            response.setContentType("text/html");
-            response.getWriter().write("<p>Erro ao listar produtos: " + e.getMessage() + "</p>");
-        }
+    public void listarProdutos(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        List<Produto> produtos = findAll();
 
         response.setContentType("text/html");
         PrintWriter writer = response.getWriter();
@@ -58,9 +37,6 @@ public class ProdutoController {
         writer.println("<head>");
         writer.println("<title>Lista de Produtos</title>");
         writer.println("<link rel=\"stylesheet\" href=\"/styles.css\">");
-        writer.println("<style>");
-
-        writer.println("</style>");
         writer.println("</head>");
         writer.println("<body>");
         writer.println("<main class=\"grid grid-col-1 grid-row-auto-full w-full h-full justify-center items-center\">");
@@ -87,11 +63,12 @@ public class ProdutoController {
             writer.println("<td>" + produto.getDescricao() + "</td>");
             writer.println("<td>" + produto.getPreco() + "</td>");
             writer.println("<td>" + produto.getEstoque() + "</td>");
-            writer.println("<td><a href=/carrinho> Adicionar </a></td>");
+            writer.println("<td><a href='/carrinho/" + produto.getId() + "'>Adicionar</a></td>");
             writer.println("</tr>");
         }
 
         writer.println("</table>");
+        writer.println("<a href='/carrinho'> Ver Carrinho </a>");
         writer.println("</div>");
         writer.println("</main>");
         writer.println("</body>");
@@ -105,11 +82,14 @@ public class ProdutoController {
         writer.println("<html>");
         writer.println("<head>");
         writer.println("<title>Cadastrar Produto</title>");
-        writer.println("<link rel=\"stylesheet\" href=\"/styles.css\">");
         writer.println("<style>");
-
         writer.println(
-                "input[type=\"text\"], input[type=\"number\"] { width: 100%; padding: 8px; margin: 8px 0 16px; box-sizing: border-box; }");
+                "        body { font-family: Arial, sans-serif; max-width: 500px; margin: 30px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }");
+        writer.println(
+                "        input[type=\"text\"], input[type=\"number\"] { width: 100%; padding: 8px; margin: 8px 0 16px; box-sizing: border-box; }");
+        writer.println(
+                "        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }");
+        writer.println("        button:hover { background-color: #218838; }");
         writer.println("</style>");
         writer.println("</head>");
 
@@ -163,11 +143,74 @@ public class ProdutoController {
 
             stmt.executeUpdate();
             response.setStatus(HttpServletResponse.SC_CREATED);
-            response.sendRedirect("/produtos");
+            response.sendRedirect("/lojista/produtos");
 
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Erro ao inserir produto.");
             e.printStackTrace();
         }
+    }
+
+    @RequestMapping(value = "/lojista/produtos", method = RequestMethod.GET)
+    public void exibirProdutos(HttpServletResponse response) throws IOException {
+        List<Produto> produtos = findAll();
+        response.setContentType("text/html");
+        PrintWriter writer = response.getWriter();
+        writer.println("<html>");
+        writer.println("<head>");
+        writer.println("<title>Lista de Produtos</title>");
+        writer.println("<link rel=\"stylesheet\" href=\"/styles.css\">");
+        writer.println("</head>");
+        writer.println("<body>");
+        writer.println("<h2>Produtos</h2>");
+        writer.println("<table>");
+        writer.println("<tr>");
+        writer.println("<th>Nome</th>");
+        writer.println("<th>Descrição</th>");
+        writer.println("<th>Preço</th>");
+        writer.println("<th>Estoque</th>");
+        writer.println("</tr>");
+
+        for (Produto produto : produtos) {
+            writer.println("<tr>");
+            writer.println("<td>" + produto.getNome() + "</td>");
+            writer.println("<td>" + produto.getDescricao() + "</td>");
+            writer.println("<td>" + produto.getPreco() + "</td>");
+            writer.println("<td>" + produto.getEstoque() + "</td>");
+            writer.println("</tr>");
+        }
+        writer.println("</table>");
+        writer.println("    <form action='/lojista/produto' method='get'>");
+        writer.println("    <button type='submit' class='btn-canto-pagina'>Cadastrar Novo Produto</button>");
+        writer.println("    </form>");
+        writer.println("</body>");
+        writer.println("</html>");
+    }
+
+    public List<Produto> findAll() {
+        List<Produto> produtos = new ArrayList<>();
+
+        String sql = "SELECT * FROM produtos";
+
+        try (Connection conn = DriverManager.getConnection(this.url, this.user, this.password);
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Produto p = new Produto(
+                        rs.getInt("id"),
+                        rs.getString("nome"),
+                        rs.getString("descricao"),
+                        rs.getDouble("preco"),
+                        rs.getInt("estoque"));
+                produtos.add(p);
+            }
+
+        } catch (SQLException e) {
+            if (produtos.isEmpty()) {
+                return null;
+            }
+        }
+        return produtos;
     }
 }
