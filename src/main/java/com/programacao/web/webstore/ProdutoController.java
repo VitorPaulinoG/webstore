@@ -41,10 +41,6 @@ public class ProdutoController {
         writer.println("<body>");
         writer.println("<main class=\"grid grid-col-1 grid-row-auto-full w-full h-full justify-center items-center\">");
 
-        writer.println("<header class=\"flex justify-right p-2\">");
-        writer.println("<form action=\"/logout\" method=\"post\"><button type=\"submit\" >Deslogar</button>");
-        writer.println("</header>");
-
         writer.println(
                 "<div style=\"margin: 30px auto; padding: 20px; min-height: 30rem\" class=\"border rounded w-50\">");
         writer.println("<h2>Lista de Produtos</h2>");
@@ -71,6 +67,7 @@ public class ProdutoController {
         writer.println("</div>");
         writer.println("</main>");
         writer.println("<a href='/carrinho'> Ver Carrinho </a>");
+        writer.println("<form action=\"/logout\" method=\"post\"><button type=\"submit\" class='btn-deslogar'>Deslogar</button></form>");
         writer.println("</body>");
         writer.println("</html>");
     }
@@ -96,14 +93,10 @@ public class ProdutoController {
         writer.println("<body>");
         writer.println("<main class=\"grid grid-col-1 grid-row-auto-full w-full h-full justify-center items-center\">");
 
-        writer.println("<header class=\"flex justify-right p-2\">");
-        writer.println("<form action=\"/logout\" method=\"post\"><button type=\"submit\" >Deslogar</button>");
-        writer.println("</header>");
-
         writer.println(
                 "<div style=\"margin: 30px auto; padding: 20px;\" class=\"border rounded w-50\">");
         writer.println("<h2>Cadastrar Novo Produto</h2>");
-        writer.println("<form action='/produto' method='post'>");
+        writer.println("<form action='/lojista/produto' method='post'>");
         writer.println("<label for='nome'>Nome do Produto:</label>");
         writer.println("<input type='text' id='nome' name='nome' required>");
         writer.println("<label for='descricao'>Descrição:</label>");
@@ -112,11 +105,11 @@ public class ProdutoController {
         writer.println("<input type='number' id='preco' name='preco' step='0.01' required>");
         writer.println("<label for='estoque'>Estoque:</label>");
         writer.println("<input type='number' id='estoque' name='estoque' required>");
-        writer.println("<button type='submit'>Cadastrar</button>");
+        writer.println("<button type='submit' class='btn-canto-pagina'>Cadastrar</button>");
         writer.println("</form>");
         writer.println("</div>");
-
         writer.println("</main>");
+        writer.println("<form action=\"/logout\" method=\"post\"><button type=\"submit\" class='btn-deslogar''>Deslogar</button></form>");
         writer.println("</body>");
         writer.println("</html>");
 
@@ -183,6 +176,7 @@ public class ProdutoController {
         writer.println("    <form action='/lojista/produto' method='get'>");
         writer.println("    <button type='submit' class='btn-canto-pagina'>Cadastrar Novo Produto</button>");
         writer.println("    </form>");
+        writer.println("<form action=\"/logout\" method=\"post\"><button type=\"submit\" class='btn-deslogar'>Deslogar</button></form>");
         writer.println("</body>");
         writer.println("</html>");
     }

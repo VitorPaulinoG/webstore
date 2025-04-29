@@ -168,5 +168,11 @@ h2 {
     position: fixed;
     margin-top: 20px;
     right: 40px;
-
 }
+
+.btn-deslogar{
+    position: fixed;
+    margin-top: 80px;
+    right: 40px;
+}
+
