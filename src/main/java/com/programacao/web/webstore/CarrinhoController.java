@@ -94,6 +94,7 @@ public class CarrinhoController {
 
         writer.println("</table>");
         writer.println("<a href='/cliente/produtos'> Ver Produtos </a>");
+        writer.println("<form action='/finalizar' method='get'><button type='submit'>Finalizar Carrinho</button></form>");
         writer.println("</body>");
         writer.println("</html>");
 
