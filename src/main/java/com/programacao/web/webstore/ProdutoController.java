@@ -1,19 +1,24 @@
 package com.programacao.web.webstore;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class ProdutoController {
@@ -39,11 +44,19 @@ public class ProdutoController {
         writer.println("<link rel=\"stylesheet\" href=\"/styles.css\">");
         writer.println("</head>");
         writer.println("<body>");
-        writer.println("<main class=\"grid grid-col-1 grid-row-auto-full w-full h-full justify-center items-center\">");
 
+        writer.println("<header class=\"h-3 py-2 flex justify-center\">");
+        writer.println("<div class=\"h-full flex items-center justify-between border rounded w-54 px-2\">");
+        writer.println("<div></div>");
         writer.println(
-                "<div style=\"margin: 30px auto; padding: 20px; min-height: 30rem\" class=\"border rounded w-50\">");
-        writer.println("<h2>Lista de Produtos</h2>");
+                "<form action=\"/logout\" method=\"post\" class=\"w-auto m-0\"><button class=\"w-auto\" type=\"submit\">Deslogar</button></form>");
+        writer.println("</div>");
+        writer.println("</header>");
+
+        writer.println("<main class=\"grid grid-col-1 grid-row-auto-full w-full h-full justify-center items-center\">");
+        writer.println(
+                "<div style=\"margin: 30px auto; padding: 20px; min-height: 30rem\" class=\"flex flex-col items-center border rounded w-54 border-box gap-2\">");
+        writer.println("<h2 class=\"m-0\">Lista de Produtos</h2>");
         writer.println("<table>");
         writer.println("<tr>");
         writer.println("<th>Nome</th>");
@@ -64,10 +77,11 @@ public class ProdutoController {
         }
 
         writer.println("</table>");
+        writer.println("<form action='/carrinho' method='get' class=\"w-full\">");
+        writer.println("<button type='submit'>Ver Carrinho</button>");
+        writer.println("</form>");
         writer.println("</div>");
         writer.println("</main>");
-        writer.println("<a href='/carrinho'> Ver Carrinho </a>");
-        writer.println("<form action=\"/logout\" method=\"post\"><button type=\"submit\" class='btn-deslogar'>Deslogar</button></form>");
         writer.println("</body>");
         writer.println("</html>");
     }
@@ -79,24 +93,26 @@ public class ProdutoController {
         writer.println("<html>");
         writer.println("<head>");
         writer.println("<title>Cadastrar Produto</title>");
-        writer.println("<style>");
-        writer.println(
-                "        body { font-family: Arial, sans-serif; max-width: 500px; margin: 30px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }");
-        writer.println(
-                "        input[type=\"text\"], input[type=\"number\"] { width: 100%; padding: 8px; margin: 8px 0 16px; box-sizing: border-box; }");
-        writer.println(
-                "        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }");
-        writer.println("        button:hover { background-color: #218838; }");
-        writer.println("</style>");
+        writer.println("<link rel=\"stylesheet\" href=\"/styles.css\">");
         writer.println("</head>");
-
         writer.println("<body>");
-        writer.println("<main class=\"grid grid-col-1 grid-row-auto-full w-full h-full justify-center items-center\">");
 
+        writer.println("<header class=\"h-3 py-2 flex justify-center\">");
+        writer.println("<div class=\"h-full flex items-center justify-between border rounded w-54 px-2\">");
+        writer.println(
+                "<form action=\"produtos\" method=\"get\" class=\"w-auto m-0\"><button class=\"w-auto\" type=\"submit\">Voltar</button></form>");
+        writer.println(
+                "<form action=\"/logout\" method=\"post\" class=\"w-auto m-0\"><button class=\"w-auto\" type=\"submit\">Deslogar</button></form>");
+        writer.println("</div>");
+        writer.println("</header>");
+
+        writer.println("<main class=\"grid grid-col-1 grid-row-auto-full w-full h-full justify-center items-center\">");
+        writer.println("<head>");
+        writer.println("</head>");
         writer.println(
                 "<div style=\"margin: 30px auto; padding: 20px;\" class=\"border rounded w-50\">");
         writer.println("<h2>Cadastrar Novo Produto</h2>");
-        writer.println("<form action='/lojista/produto' method='post'>");
+        writer.println("<form class=\"flex flex-col gap-2\"  action='/lojista/produto' method='post'>");
         writer.println("<label for='nome'>Nome do Produto:</label>");
         writer.println("<input type='text' id='nome' name='nome' required>");
         writer.println("<label for='descricao'>Descrição:</label>");
@@ -109,7 +125,8 @@ public class ProdutoController {
         writer.println("</form>");
         writer.println("</div>");
         writer.println("</main>");
-        writer.println("<form action=\"/logout\" method=\"post\"><button type=\"submit\" class='btn-deslogar''>Deslogar</button></form>");
+        writer.println(
+                "<form action=\"/logout\" method=\"post\"><button type=\"submit\" class='btn-deslogar''>Deslogar</button></form>");
         writer.println("</body>");
         writer.println("</html>");
 
@@ -155,7 +172,20 @@ public class ProdutoController {
         writer.println("<link rel=\"stylesheet\" href=\"/styles.css\">");
         writer.println("</head>");
         writer.println("<body>");
-        writer.println("<h2>Produtos</h2>");
+
+        writer.println("<header class=\"h-3 py-2 flex justify-center\">");
+        writer.println("<div class=\"h-full flex items-center justify-between border rounded w-54 border-box px-2\">");
+        writer.println("<div></div>");
+        writer.println(
+                "<form action=\"/logout\" method=\"post\" class=\"w-auto m-0\"><button class=\"w-auto\" type=\"submit\">Deslogar</button></form>");
+        writer.println("</div>");
+        writer.println("</header>");
+
+        writer.println("<main class=\"grid grid-col-1 grid-row-auto-full w-full h-full justify-center items-center\">");
+
+        writer.println(
+                "<div style=\"margin: 30px auto; padding: 20px; min-height: 30rem\" class=\"flex flex-col items-center border rounded w-54 border-box gap-2\">");
+        writer.println("<h2 class=\"m-0\">Produtos</h2>");
         writer.println("<table>");
         writer.println("<tr>");
         writer.println("<th>Nome</th>");
@@ -173,10 +203,11 @@ public class ProdutoController {
             writer.println("</tr>");
         }
         writer.println("</table>");
-        writer.println("    <form action='/lojista/produto' method='get'>");
-        writer.println("    <button type='submit' class='btn-canto-pagina'>Cadastrar Novo Produto</button>");
-        writer.println("    </form>");
-        writer.println("<form action=\"/logout\" method=\"post\"><button type=\"submit\" class='btn-deslogar'>Deslogar</button></form>");
+        writer.println("<form action='/lojista/produto' method='get' class=\"w-full\">");
+        writer.println("<button type='submit'>Cadastrar Novo Produto</button>");
+        writer.println("</form>");
+        writer.println("</div>");
+        writer.println("</main>");
         writer.println("</body>");
         writer.println("</html>");
     }
