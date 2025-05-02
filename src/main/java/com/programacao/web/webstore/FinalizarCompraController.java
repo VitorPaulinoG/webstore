@@ -65,6 +65,13 @@ public class FinalizarCompraController {
                psUpdate.setInt(2, produtoId);
                psUpdate.executeUpdate();
 
+               if (estoqueAtual == 0) {
+                  PreparedStatement psDelete = conn.prepareStatement("DELETE FROM produtos WHERE id = ?");
+                  psDelete.setInt(1, produtoId);
+                  psDelete.executeUpdate();
+                  psDelete.close();
+               }
+
                total += quantidadeComprada * preco;
             }
 
@@ -109,8 +116,8 @@ public class FinalizarCompraController {
       writer.println("<main class=\"grid grid-col-1 grid-row-auto-full w-full h-full justify-center items-center\">");
       writer.println(
             "<div style=\"margin: 30px auto; padding: 20px; min-height: 30rem\" class=\"flex flex-col items-center border rounded w-54 border-box gap-2\">");
-      writer.println("<h1>Finalizar Compra</h1>");
-      writer.println("<p>Total: " + String.format("%.2f", total) + "</p>");
+      writer.println("<h1>Finalizar compra!</h1>");
+      writer.println("<p>Total a pagar: " + String.format("%.2f", total) + "</p>");
       writer.println("</div>");
       writer.println("</main>");
       writer.println("</body>");

@@ -215,7 +215,7 @@ public class ProdutoController {
     public List<Produto> findAll() {
         List<Produto> produtos = new ArrayList<>();
 
-        String sql = "SELECT * FROM produtos";
+        String sql = "SELECT * FROM produtos WHERE estoque > 0";
 
         try (Connection conn = DriverManager.getConnection(this.url, this.user, this.password);
                 Statement stmt = conn.createStatement();
